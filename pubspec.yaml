@@ -37,6 +37,11 @@ dependencies:
   shared_preferences: ^2.2.3
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
   flutter_test:
     sdk: flutter
 
@@ -60,7 +65,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
 assets:
-  images/profile.jpeg
+  - assets/icon/icon.png
+  - images/profile.jpeg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
