@@ -23,17 +23,21 @@ class Transaction {
   final String title;
   final double amount;
   final bool isIncome;
+  final String date;
 
   Transaction({
     required this.title,
     required this.amount,
     required this.isIncome,
+    required this.date,
   });
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'amount': amount,
     'isIncome': isIncome,
+    'date': date,
+
   };
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,7 @@ class Transaction {
       title: json['title'],
       amount: json['amount'],
       isIncome: json['isIncome'],
+      date: json['date'],
     );
   }
 }
@@ -60,6 +65,21 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   final amountController = TextEditingController();
   final descController = TextEditingController();
+  DateTime? selectedDate;
+  Future<void> pickDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -102,8 +122,17 @@ class _BudgetScreenState extends State<BudgetScreen> {
     if (amount <= 0 || desc.isEmpty) return;
 
     setState(() {
+      String currentDate = selectedDate != null
+          ? selectedDate!.toString().substring(0, 10)
+          : DateTime.now().toString().substring(0, 10);
+
       transactions.add(
-        Transaction(title: desc, amount: amount, isIncome: isIncome),
+        Transaction(
+          title: desc,
+          amount: amount,
+          isIncome: isIncome,
+          date: currentDate,
+        ),
       );
 
       if (isIncome) {
@@ -117,6 +146,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
     amountController.clear();
     descController.clear();
+    selectedDate = null;
   }
 
   @override
@@ -278,6 +308,22 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ),
 
             const SizedBox(height: 15),
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: pickDate,
+                    child: Text(
+                      selectedDate == null
+                          ? "Select Date"
+                          : "${selectedDate!.toLocal()}".split(' ')[0],
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
             Row(
               children: [
@@ -296,6 +342,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     style:
                     ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text("Add Expense"),
+
                   ),
                 ),
               ],
@@ -371,7 +418,20 @@ class _BudgetScreenState extends State<BudgetScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        title: Text(tx.title),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tx.title),
+                            Text(
+                              tx.date,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+
                         trailing: Text(
                           "₹ ${tx.amount}",
                           style: TextStyle(
